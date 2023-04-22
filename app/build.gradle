@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+android {
+    ndkVersion "25.2.9519653"
+    namespace 'ru.anton2319.vpnoverssh'
+    compileSdk 33
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    defaultConfig {
+        applicationId "ru.anton2319.vpnoverssh"
+        minSdk 33
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    dexOptions {
+        preDexLibraries = false
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation (name:'tun2socks', ext:'aar')
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
