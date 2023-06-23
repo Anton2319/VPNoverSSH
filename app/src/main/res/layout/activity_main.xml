@@ -33,13 +33,23 @@
         android:layout_marginTop="16dp"
         android:paddingHorizontal="16dp" />
 
+    <Button
+        android:id="@+id/privatekey_picker_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="pick privatekey"
+        android:layout_below="@id/ssh_password"
+        android:onClick="pickFile"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="16dp" />
+
     <EditText
         android:id="@+id/ssh_hostname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Hostname or IP Address"
         android:inputType="text"
-        android:layout_below="@id/ssh_password"
+        android:layout_below="@id/privatekey_picker_button"
         android:layout_marginTop="16dp"
         android:paddingHorizontal="16dp" />
 

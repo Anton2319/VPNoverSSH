@@ -38,7 +38,6 @@ public class SocksProxyService extends VpnService {
         });
         vpnThread.start();
 
-        // We want the service to continue running until it is explicitly stopped
         return START_STICKY;
     }
 
@@ -59,6 +58,7 @@ public class SocksProxyService extends VpnService {
                     .excludeRoute(new IpPrefix(InetAddress.getByName("8.8.8.8"), 32))
                     .addDnsServer("8.8.8.8")
                     .addDisallowedApplication("com.termux")
+                    .addDisallowedApplication("ru.anton2319.vpnoverssh")
                     .establish();
             FileDescriptor tunInterface = vpnInterface.getFileDescriptor();
 
@@ -86,7 +86,7 @@ public class SocksProxyService extends VpnService {
         catch (Exception e) {
             Log.e(TAG, "VPN thread error: ", e);
             e.printStackTrace();
-            stopForeground(true);
+            stopForeground(STOP_FOREGROUND_REMOVE);
             stopSelf();
             vpnThread.interrupt();
         }
