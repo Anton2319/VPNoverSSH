@@ -134,7 +134,10 @@ public class MainActivity extends AppCompatActivity {
         else {
             Log.d(TAG, "Toggled off");
             StatusInfo.getInstance().setActive(false);
-            stopService(vpnIntent);
+            Thread vpnThread = SocksPersistent.getInstance().getVpnThread();
+            if(vpnThread != null) {
+                vpnThread.interrupt();
+            }
             stopService(sshIntent);
         }
     }

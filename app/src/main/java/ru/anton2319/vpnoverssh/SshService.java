@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-
-import com.trilead.ssh2.*;
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.DynamicPortForwarder;
 
@@ -16,8 +14,7 @@ import java.io.IOException;
 public class SshService extends Service {
 
     private static final String TAG = "SshService";
-    private Session session;
-    private Thread sshThread;
+    Thread sshThread;
     Connection conn;
     DynamicPortForwarder forwarder;
 
@@ -25,27 +22,22 @@ public class SshService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Start the SSH tunneling code
-        sshThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    System.setProperty("user.home", getFilesDir().getAbsolutePath());
-                    initiateSSH(intent);
-                } catch (InterruptedException e) {
-                    forwarder.close();
-                    conn.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.d(TAG, "trilead.ssh2 failed, and there is no fallback yet ¯\\_(ツ)_/¯");
-                }
-            }
-        });
+        sshThread = PortForward.getInstance().getSshThread();
+        if(sshThread == null) {
+            sshThread = newSshThread(intent);
+            PortForward.getInstance().setSshThread(sshThread);
+        }
+        else {
+            sshThread.interrupt();
+            sshThread = newSshThread(intent);
+            PortForward.getInstance().setSshThread(sshThread);
+        }
         sshThread.start();
 
         return START_STICKY;
     }
 
-    public void initiateSSH(Intent intent) throws Exception {
+    public void initiateSSH(Intent intent) throws IOException {
         Log.d(TAG, "Starting trilead.ssh2 service");
 
         String user = intent.getStringExtra("user");
@@ -55,9 +47,9 @@ public class SshService extends Service {
         String privateKey = intent.getStringExtra("privateKey");
         String privateKeyFilePath = File.createTempFile("vpnoverssh", null, null).getPath();
 
-
         conn = new Connection(host);
         conn.connect();
+        PortForward.getInstance().setConn(conn);
 
         // Authenticate with the SSH server
         boolean isAuthenticated = conn.authenticateWithPassword(user, password);
@@ -66,16 +58,45 @@ public class SshService extends Service {
         }
 
         forwarder = conn.createDynamicPortForwarder(1080);
+        PortForward.getInstance().setForwarder(forwarder);
     }
 
     @Override
     public void onDestroy() {
         Log.d(TAG, "Shutting down gracefully");
-        sshThread.interrupt();
+        sshThread = PortForward.getInstance().getSshThread();
+        if(sshThread != null) {
+            sshThread.interrupt();
+        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public Thread newSshThread(Intent intent) {
+        return new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.setProperty("user.home", getFilesDir().getAbsolutePath());
+                    initiateSSH(intent);
+                    while(true) {
+                        if(Thread.interrupted()) {
+                            throw new InterruptedException();
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "trilead.ssh2 failed, and there is no fallback yet ¯\\_(ツ)_/¯");
+                } catch (InterruptedException e) {
+                    conn = PortForward.getInstance().getConn();
+                    forwarder = PortForward.getInstance().getForwarder();
+                    conn.close();
+                    forwarder.close();
+                }
+            }
+        });
     }
 }
