@@ -8,8 +8,21 @@ import android.util.Log;
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.DynamicPortForwarder;
 
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import java.util.Collections;
 
 public class SshService extends Service {
 
@@ -37,7 +50,7 @@ public class SshService extends Service {
         return START_STICKY;
     }
 
-    public void initiateSSH(Intent intent) throws IOException {
+    public void initiateSSH(Intent intent) throws IOException, RuntimeException {
         Log.d(TAG, "Starting trilead.ssh2 service");
 
         String user = intent.getStringExtra("user");
@@ -52,9 +65,23 @@ public class SshService extends Service {
         PortForward.getInstance().setConn(conn);
 
         // Authenticate with the SSH server
-        boolean isAuthenticated = conn.authenticateWithPassword(user, password);
-        if (!isAuthenticated) {
-            throw new IOException("Authentication failed.");
+
+        boolean isAuthenticated;
+
+
+        if(privateKey != null) {
+            isAuthenticated = conn.authenticateWithPublicKey(user, privateKey.toCharArray(), "");
+            if (!isAuthenticated) {
+                isAuthenticated = conn.authenticateWithPassword(user, password);
+            }
+            if (!isAuthenticated) {
+                throw new RuntimeException("Cannot authenticate with the provided credentials");
+            }
+        } else {
+            isAuthenticated = conn.authenticateWithPassword(user, password);
+            if (!isAuthenticated) {
+                throw new RuntimeException("Cannot authenticate with the provided credentials");
+            }
         }
 
         forwarder = conn.createDynamicPortForwarder(1080);
@@ -87,7 +114,7 @@ public class SshService extends Service {
                             throw new InterruptedException();
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException | RuntimeException e) {
                     e.printStackTrace();
                     Log.d(TAG, "trilead.ssh2 failed, and there is no fallback yet ¯\\_(ツ)_/¯");
                 } catch (InterruptedException e) {

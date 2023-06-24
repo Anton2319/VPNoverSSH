@@ -127,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
                 StatusInfo.getInstance().setActive(true);
             } catch (Exception e) {
                 StatusInfo.getInstance().setActive(false);
-                stopService(vpnIntent);
-                stopService(sshIntent);
+                e.printStackTrace();
             }
         }
         else {
@@ -138,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
             if(vpnThread != null) {
                 vpnThread.interrupt();
             }
+            sshIntent = StatusInfo.getInstance().getSshIntent();
             stopService(sshIntent);
         }
     }

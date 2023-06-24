@@ -29,12 +29,6 @@ public class SocksProxyService extends VpnService {
     public void onDestroy() {
         Log.d(TAG, "Shutting down gracefully");
         try {
-            engine.Engine.stop();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
             ParcelFileDescriptor pfd = SocksPersistent.getInstance().getVpnInterface();
             if(pfd != null) {
                 pfd.close();
