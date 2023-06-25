@@ -60,7 +60,7 @@ public class SshService extends Service {
         String privateKey = intent.getStringExtra("privateKey");
         String privateKeyFilePath = File.createTempFile("vpnoverssh", null, null).getPath();
 
-        conn = new Connection(host);
+        conn = new Connection(host, port);
         conn.connect();
         PortForward.getInstance().setConn(conn);
 

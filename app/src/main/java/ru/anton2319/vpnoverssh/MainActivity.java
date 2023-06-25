@@ -36,12 +36,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         if(StatusInfo.getInstance().getVpnIntent() == null) {
             StatusInfo.getInstance().setVpnIntent(new Intent(this, SocksProxyService.class));
-            vpnIntent = StatusInfo.getInstance().getVpnIntent();
         }
         if(StatusInfo.getInstance().getSshIntent() == null) {
             StatusInfo.getInstance().setSshIntent(new Intent(this, SshService.class));
-            sshIntent = StatusInfo.getInstance().getSshIntent();
         }
+        vpnIntent = StatusInfo.getInstance().getVpnIntent();
+        sshIntent = StatusInfo.getInstance().getSshIntent();
         setContentView(R.layout.activity_main);
         usernameEditText = findViewById(R.id.ssh_username);
         passwordEditText = findViewById(R.id.ssh_password);
@@ -112,7 +112,12 @@ public class MainActivity extends AppCompatActivity {
                     sshIntent.putExtra("privateKey", privateKey);
                 }
                 sshIntent.putExtra("hostname", hostname);
-                sshIntent.putExtra("port", String.valueOf(port));
+                if(!String.valueOf(port).equals("") || between(port, 1 , 65535)) {
+                    sshIntent.putExtra("port", String.valueOf(port));
+                }
+                else {
+                    sshIntent.putExtra("port", String.valueOf(22));
+                }
                 startService(sshIntent);
 
                 Log.d(TAG, "Starting proxy");
@@ -140,5 +145,8 @@ public class MainActivity extends AppCompatActivity {
             sshIntent = StatusInfo.getInstance().getSshIntent();
             stopService(sshIntent);
         }
+    }
+    private static boolean between(int variable, int minValueInclusive, int maxValueInclusive) {
+        return variable >= minValueInclusive && variable <= maxValueInclusive;
     }
 }
