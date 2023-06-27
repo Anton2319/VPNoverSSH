@@ -135,11 +135,11 @@ public class NewConnectionActivity extends AppCompatActivity {
                 String privatekeyPreview = "";
                 keyInfoTextView = findViewById(R.id.keyInfoTextView);
                 if(privateKeyString.length() > 25) {
-                    privatekeyPreview = privateKeyString.substring(0, 25) + "\n";
+                    privatekeyPreview = privateKeyString.substring(0, 25) + "•••••" + "\n";
                     keyInfoTextView.setText(privatekeyPreview);
                 }
                 if(privateKey.length() > 55) {
-                    privatekeyPreview = privatekeyPreview + privateKeyString.substring(privateKeyString.length() - 26, privateKeyString.length() - 1);
+                    privatekeyPreview = privatekeyPreview + "•••••" +privateKeyString.substring(privateKeyString.length() - 26, privateKeyString.length() - 1);
                     keyInfoTextView.setText(privatekeyPreview);
                 }
                 keyCard.setVisibility(View.VISIBLE);
