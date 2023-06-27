@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -88,19 +90,7 @@ public class NewConnectionActivity extends AppCompatActivity {
                     // Private Key selected
                     authenticationType = SSHConnectionProfile.AuthenticationType.PRIVATE_KEY;
                     passwordInput.setVisibility(View.GONE);
-                    addKeyButton.setVisibility(View.GONE);
-                    keyCard.setVisibility(View.VISIBLE);
-                    keyInfoTextView = findViewById(R.id.keyInfoTextView);
-                    MaterialButton deleteKeyButton = findViewById(R.id.deleteKeyButton);
-
-                    deleteKeyButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            keyInfoTextView.setText("");
-                            privateKey = null;
-                            keyCard.setVisibility(View.GONE);
-                        }
-                    });
+                    addKeyButton.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -137,15 +127,33 @@ public class NewConnectionActivity extends AppCompatActivity {
             if (resultData != null) {
                 uri = resultData.getData();
                 privateKey = readTextFromUri(uri);
+                String privateKeyString = privateKey;
+                privateKeyString = privateKeyString.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
+                        .replace("-----END OPENSSH PRIVATE KEY-----", "");
+                privateKeyString = privateKeyString.replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "");
                 String privatekeyPreview = "";
-                if(privateKey.length() > 10) {
-                    privatekeyPreview = privateKey.substring(0, 9) + "\n";
+                keyInfoTextView = findViewById(R.id.keyInfoTextView);
+                if(privateKeyString.length() > 25) {
+                    privatekeyPreview = privateKeyString.substring(0, 25) + "\n";
                     keyInfoTextView.setText(privatekeyPreview);
                 }
-                if(privateKey.length() > 20) {
-                    privatekeyPreview = privatekeyPreview + privateKey.substring(privateKey.length() - 11, privateKey.length() - 1) + "\n";
+                if(privateKey.length() > 55) {
+                    privatekeyPreview = privatekeyPreview + privateKeyString.substring(privateKeyString.length() - 26, privateKeyString.length() - 1);
                     keyInfoTextView.setText(privatekeyPreview);
                 }
+                keyCard.setVisibility(View.VISIBLE);
+
+                MaterialButton deleteKeyButton = findViewById(R.id.deleteKeyButton);
+
+                deleteKeyButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        keyInfoTextView.setText("");
+                        privateKey = null;
+                        keyCard.setVisibility(View.GONE);
+                    }
+                });
             }
         }
     }

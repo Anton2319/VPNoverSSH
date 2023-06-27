@@ -105,26 +105,63 @@
                 android:hint="Password" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/addKeyButton"
-            android:layout_marginLeft="4dp"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/black"
-            android:text="Add Key"
-            app:icon="@drawable/baseline_add_24" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/addKeyButton"
+        android:layout_marginLeft="5dp"
+        android:visibility="visible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="?colorPrimary"
+        android:text="Add Key"
+        app:icon="@drawable/baseline_add_24" />
+
+    <LinearLayout
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/keyCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:padding="8dp"
+            android:layout_margin="2dp"
+            android:visibility="gone">
 
-            <!-- The contents of the card would go here -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:textSize="8pt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SSH Key"
+                    android:layout_marginBottom="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/keyInfoTextView"
+                    android:textSize="8pt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Key Info (Placeholder)"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deleteKeyButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Delete Key"
+                    app:icon="@drawable/baseline_delete_24" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
+</LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"

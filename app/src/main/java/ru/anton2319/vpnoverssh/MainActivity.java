@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 if(selectedProfile != null) {
                     String username = selectedProfile.getUsername();
                     String password = selectedProfile.getPassword();
+                    privateKey = selectedProfile.getPrivateKey();
                     String hostname = selectedProfile.getServerIP();
                     int port = selectedProfile.getServerPort();
                     startVpn(username, password, privateKey, hostname, port);
