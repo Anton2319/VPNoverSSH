@@ -26,6 +26,14 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <activity
+            android:name=".NewConnectionActivity"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <service android:name=".SocksProxyService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="true">

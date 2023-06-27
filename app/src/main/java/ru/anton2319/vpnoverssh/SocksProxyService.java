@@ -27,6 +27,7 @@ public class SocksProxyService extends VpnService {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         Log.d(TAG, "Shutting down gracefully");
         try {
             ParcelFileDescriptor pfd = SocksPersistent.getInstance().getVpnInterface();
@@ -35,6 +36,8 @@ public class SocksProxyService extends VpnService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(TAG, "Cannot handle shutdown gracefully, killing the service");
+            android.os.Process.killProcess(android.os.Process.myPid());
         }
 
     }
@@ -75,11 +78,13 @@ public class SocksProxyService extends VpnService {
 
             while(true) {
                 if(Thread.interrupted()) {
+                    Log.d(TAG, "Interruption signal received");
                     throw new InterruptedException();
                 }
             }
         }
         catch (InterruptedException e) {
+            Log.d(TAG, "Stopping service");
             onDestroy();
         }
         catch (Exception e) {
