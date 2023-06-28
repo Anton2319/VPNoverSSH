@@ -3,6 +3,9 @@ package ru.anton2319.vpnoverssh;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
+import java.util.UUID;
+
 public class SSHConnectionProfile {
     private String serverIP;
     private int serverPort;
@@ -17,6 +20,8 @@ public class SSHConnectionProfile {
         PASSWORD,
         PRIVATE_KEY
     }
+
+    public UUID uuid = UUID.randomUUID();
 
     public SSHConnectionProfile() {}
 

@@ -1,9 +1,7 @@
 package ru.anton2319.vpnoverssh;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +12,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     SSHConnectionProfile selectedProfile;
 
     private static final String TAG = "MainActivity";
-    private static final int READ_REQUEST_CODE = 42;
 
     private String privateKey;
 
@@ -71,15 +64,21 @@ public class MainActivity extends AppCompatActivity {
 
         ImageButton editButton = findViewById(R.id.editProfileButton);
 
+        //noinspection Convert2Lambda
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // to be implemented
+                if(selectedProfile != null && selectedProfile.uuid != null) {
+                    Intent intent = new Intent(context, NewConnectionActivity.class);
+                    intent.putExtra("uuid", selectedProfile.uuid.toString());
+                    startActivity(intent);
+                }
             }
         });
 
         ImageButton addButton = findViewById(R.id.addProfileButton);
 
+        //noinspection Convert2Lambda
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button connectButton = findViewById(R.id.ssh_connect_button);
+        //noinspection Convert2Lambda
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Starting proxy");
                 Intent intentPrepare = VpnService.prepare(this);
                 if (intentPrepare != null) {
+                    // TODO: replace deprecated method
                     startActivityForResult(intentPrepare, 0);
                 }
                 vpnIntent.putExtra("socksPort", 1080);
