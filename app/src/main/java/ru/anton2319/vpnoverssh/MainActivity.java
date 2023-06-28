@@ -109,31 +109,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Uri uri;
-            if (resultData != null) {
-                uri = resultData.getData();
-                privateKey = readTextFromUri(uri);
-            }
-        }
+    public void onResume() {
+        super.onResume();
+        SSHConnectionProfileManager sshConnectionProfileManager = new SSHConnectionProfileManager(this);
+        sshConnectionProfileList = sshConnectionProfileManager.loadProfiles();
+        SSHConnectionProfileAdapter adapter = new SSHConnectionProfileAdapter(this, sshConnectionProfileList);
+        Spinner spinner = findViewById(R.id.spinner);
+        spinner.setAdapter(adapter);
+
     }
 
-    private String readTextFromUri(Uri uri) {
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
-            }
-            inputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return stringBuilder.toString();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
     }
 
     private void startVpn(String username, String password, String privateKey, String hostname, int port) {
