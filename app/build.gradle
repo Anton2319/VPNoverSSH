@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "ru.anton2319.vpnoverssh"
-        minSdk 33
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -43,6 +43,7 @@ android {
 dependencies {
     implementation (name:'tun2socks', ext:'aar')
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'commons-net:commons-net:3.9.0'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'com.github.Mamoon-Alhawamdeh:AmazingSpinner:2.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
