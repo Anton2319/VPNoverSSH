@@ -10,8 +10,11 @@ import android.util.Log;
 import org.apache.commons.net.util.SubnetUtils;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class SocksProxyService extends VpnService {
 
@@ -63,10 +66,13 @@ public class SocksProxyService extends VpnService {
                 builder.addRoute(new IpPrefix(InetAddress.getByName("0.0.0.0"), 0));
                 builder.excludeRoute(new IpPrefix(InetAddress.getByName("8.8.8.8"), 32));
             } else {
-                String[] excludedIps = {"8.8.8.8"};
+                ArrayList<Long> excludedIps = new ArrayList<>();
+                excludedIps.add(ipATON("1.1.1.1"));
+                excludedIps.add(ipATON("8.8.8.8"));
                 addRoutesExcluding(builder, excludedIps);
             }
-            vpnInterface = builder.addDnsServer("8.8.8.8")
+            vpnInterface = builder.addDnsServer("1.1.1.1")
+                    .addDnsServer("8.8.8.8")
                     .addDisallowedApplication("ru.anton2319.vpnoverssh")
                     .establish();
             SocksPersistent.getInstance().setVpnInterface(vpnInterface);
@@ -121,69 +127,114 @@ public class SocksProxyService extends VpnService {
         });
     }
 
-    private void addRoutesExcluding(Builder builder, String[] excludedIps) {
-        for (int i = 1; i < 255; i++) {
-            String block8 = i + ".0.0.0/8";
-            if (!blockIsExcluded(block8, excludedIps)) {
-                if(!block8.equals("127.0.0.0/8")) {
-                    try {
-                        builder.addRoute(i + ".0.0.0", 8);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+    public static void addRoutesExcluding(Builder builder, ArrayList<Long> excludedIpsAton) {
+        Collections.sort(excludedIpsAton);
+        // bypass local subnet
+        long currentAddress = ipATON("0.0.0.0");
+        long endAddress = ipATON("126.255.255.255");
+
+        while(currentAddress <= endAddress) {
+            int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
+            long resultingAddress = currentAddress + subnetSize(mask);
+            if(excludedIpsAton.contains(currentAddress)) {
+                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
+                excludedIpsAton.remove(0);
+            }
+            else {
+                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
+                builder.addRoute(ipNTOA(currentAddress), mask);
+            }
+            currentAddress = resultingAddress;
+        }
+
+        // bypass multicast
+        currentAddress = ipATON("128.0.0.0");
+        endAddress = ipATON("223.255.255.255");
+
+
+        while(currentAddress <= endAddress) {
+            int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
+            long resultingAddress = currentAddress + subnetSize(mask);
+            if(excludedIpsAton.contains(currentAddress)) {
+                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
+                excludedIpsAton.remove(0);
+            }
+            else {
+                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
+                builder.addRoute(ipNTOA(currentAddress), mask);
+            }
+            currentAddress = resultingAddress;
+        }
+
+        // all other addresses
+        currentAddress = ipATON("240.0.0.0");
+        endAddress = ipATON("255.255.255.255");
+
+
+        while(currentAddress <= endAddress) {
+            int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
+            long resultingAddress = currentAddress + subnetSize(mask);
+            if(excludedIpsAton.contains(currentAddress)) {
+                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
+                excludedIpsAton.remove(0);
+            }
+            else {
+                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
+                builder.addRoute(ipNTOA(currentAddress), mask);
+            }
+            currentAddress = resultingAddress;
+        }
+    }
+
+    public static int getMaximumMask(long startingAddress, long maximumAddress) {
+        int subnetMask = 32;
+        int maximumSubnetLimit = 8;
+        String[] ntoa_split = ipNTOA(startingAddress).split("\\.");
+        if(!ntoa_split[1].equals("0")) {
+            maximumSubnetLimit = 16;
+            if(!ntoa_split[2].equals("0")) {
+                maximumSubnetLimit = 24;
+                if(!ntoa_split[3].equals("0")) {
+                    maximumSubnetLimit = 32;
                 }
-            } else {
-                for (int j = 0; j < 256; j++) {
-                    String block16 = i + "." + j + ".0.0/16";
-                    if (!blockIsExcluded(block16, excludedIps)) {
-                        builder.addRoute(i + "." + j + ".0.0", 16);
-                    } else {
-                        for (int k = 0; k < 256; k++) {
-                            String block24 = i + "." + j + "." + k + ".0/24";
-                            if (!blockIsExcluded(block24, excludedIps)) {
-                                builder.addRoute(i + "." + j + "." + k + ".0", 24);
-                            } else {
-                                for (int l = 1; l < 256; l++) {
-                                    String ipAddress = i + "." + j + "." + k + "." + l;
-                                    if (!isExcluded(ipAddress, excludedIps)) {
-                                        Log.d(TAG, ipAddress);
-                                        builder.addRoute(ipAddress, 32);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
-    }
-
-    private boolean blockIsExcluded(String block, String[] excludedIps) {
-        for (String excludedIp : excludedIps) {
-            if (isIpWithinRange(excludedIp, block)) {
-                return true;
+        while (subnetMask > maximumSubnetLimit) {
+            long subnetSize = subnetSize(subnetMask - 1);
+            if((startingAddress + subnetSize) < maximumAddress) {
+                subnetMask = subnetMask - 1;
+            }
+            else {
+                break;
             }
         }
-        return false;
+        return subnetMask;
     }
 
-    private boolean isExcluded(String ipAddress, String[] excludedIps) {
-        for (String excludedIp : excludedIps) {
-            if (ipAddress.equals(excludedIp)) {
-                return true;
+    public static long subnetSize(long subnetMask) {
+        return (long) Math.pow(2, 32 - subnetMask);
+    }
+
+    public static long ipATON(String ip) {
+        String[] addrArray = ip.split("\\.");
+        long num = 0;
+        for (int i = 0; i < addrArray.length; i++)
+        {
+            int power = 3 - i;
+            num += ((Integer.parseInt(addrArray[i]) % 256 * Math.pow(256, power)));
+        }
+        return num;
+    }
+
+    public static String ipNTOA(long binaryIp) {
+        StringBuilder dottedDecimal = new StringBuilder();
+        for (int i = 3; i >= 0; i--) {
+            long octet = (binaryIp >> (i * 8)) & 0xFF;
+            dottedDecimal.append(octet);
+            if (i > 0) {
+                dottedDecimal.append(".");
             }
         }
-        return false;
-    }
-
-    public static boolean isIpWithinRange(String ip, String cidrNotation) {
-        InetAddress inetAddress = null;
-        try {
-            inetAddress = InetAddress.getByName(ip);
-        } catch (UnknownHostException e) {
-            return false;
-        }
-        SubnetUtils subnet = new SubnetUtils(cidrNotation);
-        return subnet.getInfo().isInRange(inetAddress.getHostAddress());
+        return dottedDecimal.toString();
     }
 }
