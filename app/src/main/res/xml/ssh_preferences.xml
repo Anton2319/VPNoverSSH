@@ -1,0 +1,16 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:singleLineTitle="false"
+        app:shouldDisableView="true"
+        app:enabled="false"
+        app:layout="@layout/forwarder_port_description" />
+    <EditTextPreference
+        app:key="forwarder_port"
+        app:icon="@drawable/baseline_dns_24"
+        app:title="@string/forwarder_port_title"
+        app:summary="@string/forwarder_port_description"
+        app:useSimpleSummaryProvider="true"
+        />
+
+</PreferenceScreen>

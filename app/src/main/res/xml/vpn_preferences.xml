@@ -1,0 +1,23 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference
+        app:singleLineTitle="false"
+        app:shouldDisableView="true"
+        app:enabled="false"
+        app:layout="@layout/dns_ip_description" />
+
+    <EditTextPreference
+        app:key="dns_resolver_ip"
+        app:icon="@drawable/baseline_dns_24"
+        app:title="@string/dns_title"
+        app:useSimpleSummaryProvider="true"
+        app:defaultValue="1.1.1.1" />
+
+    <Preference
+        app:fragment="ru.anton2319.vpnoverssh.SettingsActivity$AppsFragment"
+        app:key="included_packages"
+        app:icon="@drawable/baseline_apps_24"
+        app:title="@string/apps_title"
+        app:summary="@string/apps_description"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

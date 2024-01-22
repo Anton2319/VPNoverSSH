@@ -1,4 +1,4 @@
-package ru.anton2319.vpnoverssh;
+package ru.anton2319.vpnoverssh.data.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import java.util.List;
+
+import ru.anton2319.vpnoverssh.data.SSHConnectionProfile;
 
 public class SSHConnectionProfileAdapter extends ArrayAdapter<SSHConnectionProfile> {
     private LayoutInflater inflater;

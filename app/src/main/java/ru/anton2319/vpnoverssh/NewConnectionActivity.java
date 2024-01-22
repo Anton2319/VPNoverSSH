@@ -22,6 +22,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.UUID;
 
+import ru.anton2319.vpnoverssh.data.SSHConnectionProfile;
+import ru.anton2319.vpnoverssh.data.utils.SSHConnectionProfileManager;
+
 public class NewConnectionActivity extends AppCompatActivity {
     View passwordInputLayout;
     TextInputEditText serverAddressInput, serverPortInput, usernameInput, passwordInput;

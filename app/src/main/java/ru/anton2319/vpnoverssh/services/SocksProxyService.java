@@ -1,29 +1,59 @@
-package ru.anton2319.vpnoverssh;
+package ru.anton2319.vpnoverssh.services;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.IpPrefix;
 import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import org.apache.commons.net.util.SubnetUtils;
+import androidx.preference.PreferenceManager;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import ru.anton2319.vpnoverssh.data.singleton.SocksPersistent;
+import ru.anton2319.vpnoverssh.data.singleton.StatusInfo;
 
 public class SocksProxyService extends VpnService {
 
     private static final String TAG = "SocksProxyService";
 
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
     private Thread vpnThread;
+    SharedPreferences sharedPreferences;
+
+    public Future<String> getDnsIp(SharedPreferences sharedPreferences) {
+        return executor.submit(() -> {
+            return sharedPreferences.getString("dns_resolver_ip", "1.1.1.1");
+        });
+    }
+
+    private Future<Set<String>> getSelectedApps(SharedPreferences sharedPreferences) {
+        return executor.submit(() -> {
+            return sharedPreferences.getStringSet("included_apps", new HashSet<String>());
+        });
+    }
+
+    private Future<Set<String>> getSelectedAppsFuture;
+
+    Future<String> getDnsIpFuture;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        getSelectedAppsFuture = getSelectedApps(sharedPreferences);
+        getDnsIpFuture = getDnsIp(sharedPreferences);
         // Start the VPN thread
         vpnThread = newVpnThread();
         SocksPersistent.getInstance().setVpnThread(vpnThread);
@@ -50,7 +80,7 @@ public class SocksProxyService extends VpnService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "Cannot handle shutdown gracefully, killing the service");
+            Log.d(TAG, "Cannot handle graceful shutdown, killing the service");
             android.os.Process.killProcess(android.os.Process.myPid());
         }
 
@@ -64,21 +94,28 @@ public class SocksProxyService extends VpnService {
             builder.setMtu(1500).addAddress("26.26.26.1", 24);
             if (android.os.Build.VERSION.SDK_INT >= 33) {
                 builder.addRoute(new IpPrefix(InetAddress.getByName("0.0.0.0"), 0));
-                builder.excludeRoute(new IpPrefix(InetAddress.getByName("8.8.8.8"), 32));
+                builder.excludeRoute(new IpPrefix(InetAddress.getByName(getDnsIpFuture.get()), 32));
             } else {
                 ArrayList<Long> excludedIps = new ArrayList<>();
-                excludedIps.add(ipATON("1.1.1.1"));
-                excludedIps.add(ipATON("8.8.8.8"));
+                excludedIps.add(ipATON(getDnsIpFuture.get()));
                 addRoutesExcluding(builder, excludedIps);
             }
-            vpnInterface = builder.addDnsServer("1.1.1.1")
-                    .addDnsServer("8.8.8.8")
-                    .addDisallowedApplication("ru.anton2319.vpnoverssh")
-                    .establish();
+            if (getSelectedAppsFuture.get().isEmpty()) {
+                builder.addDnsServer(getDnsIpFuture.get())
+                        .addDisallowedApplication("ru.anton2319.vpnoverssh");
+            }
+            else {
+                for (String packageName : getSelectedAppsFuture.get()) {
+                    builder.addAllowedApplication(packageName);
+                }
+            }
+
+            vpnInterface = builder.establish();
+
             SocksPersistent.getInstance().setVpnInterface(vpnInterface);
 
             String socksHostname = "127.0.0.1";
-            int socksPort = 1080;
+            int socksPort = Integer.parseInt(Optional.of(sharedPreferences.getString("forwarder_port", "1080")).orElse("1080"));
 
             // Initialize proxy
             engine.Key key = new engine.Key();
@@ -87,7 +124,7 @@ public class SocksProxyService extends VpnService {
             key.setDevice("fd://" + vpnInterface.getFd());
             key.setInterface("");
             key.setLogLevel("warning");
-            key.setProxy("socks5://127.0.0.1:1080");
+            key.setProxy("socks5://127.0.0.1:"+socksPort);
             key.setRestAPI("");
             key.setTCPSendBufferSize("");
             key.setTCPReceiveBufferSize("");
@@ -137,11 +174,9 @@ public class SocksProxyService extends VpnService {
             int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
             long resultingAddress = currentAddress + subnetSize(mask);
             if(excludedIpsAton.contains(currentAddress)) {
-                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
                 excludedIpsAton.remove(0);
             }
             else {
-                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
                 builder.addRoute(ipNTOA(currentAddress), mask);
             }
             currentAddress = resultingAddress;
@@ -175,11 +210,9 @@ public class SocksProxyService extends VpnService {
             int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
             long resultingAddress = currentAddress + subnetSize(mask);
             if(excludedIpsAton.contains(currentAddress)) {
-                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
                 excludedIpsAton.remove(0);
             }
             else {
-                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
                 builder.addRoute(ipNTOA(currentAddress), mask);
             }
             currentAddress = resultingAddress;

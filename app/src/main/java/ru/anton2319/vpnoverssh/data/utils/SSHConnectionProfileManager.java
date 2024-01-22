@@ -1,4 +1,4 @@
-package ru.anton2319.vpnoverssh;
+package ru.anton2319.vpnoverssh.data.utils;
 
 import android.content.Context;
 import android.util.Log;
@@ -16,6 +16,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import ru.anton2319.vpnoverssh.data.SSHConnectionProfile;
 
 
 // whoever reads this... I'm sorry

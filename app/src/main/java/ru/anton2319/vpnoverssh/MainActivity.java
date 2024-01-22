@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -14,6 +16,14 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
+
+import ru.anton2319.vpnoverssh.data.SSHConnectionProfile;
+import ru.anton2319.vpnoverssh.data.singleton.SocksPersistent;
+import ru.anton2319.vpnoverssh.data.singleton.StatusInfo;
+import ru.anton2319.vpnoverssh.data.utils.SSHConnectionProfileAdapter;
+import ru.anton2319.vpnoverssh.data.utils.SSHConnectionProfileManager;
+import ru.anton2319.vpnoverssh.services.SocksProxyService;
+import ru.anton2319.vpnoverssh.services.SshService;
 
 public class MainActivity extends AppCompatActivity {
     List<SSHConnectionProfile> sshConnectionProfileList;
@@ -117,6 +127,24 @@ public class MainActivity extends AppCompatActivity {
         Spinner spinner = findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

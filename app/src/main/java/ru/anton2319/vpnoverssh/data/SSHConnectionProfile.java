@@ -1,9 +1,8 @@
-package ru.anton2319.vpnoverssh;
+package ru.anton2319.vpnoverssh.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 public class SSHConnectionProfile {

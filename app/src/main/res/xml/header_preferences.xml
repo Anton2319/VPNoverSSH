@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:fragment="ru.anton2319.vpnoverssh.SettingsActivity$VPNFragment"
+        app:icon="@drawable/vpn_key_fill0_wght400_grad0_opsz24"
+        app:summary="@string/vpn_description"
+        app:title="@string/vpn_header" />
+
+    <Preference
+        app:fragment="ru.anton2319.vpnoverssh.SettingsActivity$SSHFragment"
+        app:icon="@drawable/pictogrammers_material_ssh"
+        app:summary="@string/ssh_description"
+        app:title="@string/ssh_header" />
+</PreferenceScreen>

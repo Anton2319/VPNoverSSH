@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">VPNoverSSH</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="vpn_header">VPN Preferences</string>
+    <string name="vpn_description">Configures what traffic goes into the tunnel</string>
+    <string name="ssh_header">SSH Preferences</string>
+    <string name="ssh_description">Configures how your device connects to the server</string>
+
+    <!-- VPN Preferences -->
+    <string name="dns_title">DNS Resolver IP</string>
+    <string name="dns_ip_description">Use a custom DNS server. Leave empty to use defaults. Warning! DNS queries will always bypass VPN.</string>
+    <string name="apps_title">Included Apps</string>
+    <string name="apps_description">Choose which apps will use the tunnel and which will connect directly. By default, all apps are included in the tunnel</string>
+
+
+    <!-- SSH Preferences -->
+    <string name="forwarder_port_title">Forwarder port</string>
+    <string name="forwarder_port_description">Manually assign a port for SSH forwarder. Port will be assigned automatically if empty:</string>
+
 </resources>

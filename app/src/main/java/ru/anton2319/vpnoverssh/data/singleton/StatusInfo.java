@@ -1,4 +1,4 @@
-package ru.anton2319.vpnoverssh;
+package ru.anton2319.vpnoverssh.data.singleton;
 
 import android.content.Intent;
 

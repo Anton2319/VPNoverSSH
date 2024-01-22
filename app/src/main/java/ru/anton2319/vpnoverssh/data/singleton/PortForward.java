@@ -1,6 +1,4 @@
-package ru.anton2319.vpnoverssh;
-
-import android.content.Intent;
+package ru.anton2319.vpnoverssh.data.singleton;
 
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.DynamicPortForwarder;
