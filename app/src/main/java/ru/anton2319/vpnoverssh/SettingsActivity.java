@@ -174,7 +174,6 @@ public class SettingsActivity extends AppCompatActivity implements
         @Override
         public void onPause() {
             if(adapter != null) {
-                Log.d(TAG, "1223");
                 sharedPreferences.edit().putStringSet("included_apps", adapter.getSelectedApps()).apply();
             }
             super.onPause();

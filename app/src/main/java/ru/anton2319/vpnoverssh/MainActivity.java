@@ -154,6 +154,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void startVpn(String username, String password, String privateKey, String hostname, int port) {
         if(!StatusInfo.getInstance().isActive()) {
+            Log.d(TAG, "Preparing VpnService");
+            Intent intentPrepare = VpnService.prepare(this);
+            if (intentPrepare != null) {
+                // TODO: replace deprecated method
+                StatusInfo.getInstance().setActive(false);
+                Log.d(TAG, "Toggled off due to missing permission");
+                startActivityForResult(intentPrepare, 0);
+                return;
+            }
             Log.d(TAG, "Toggled on");
             StatusInfo.getInstance().setActive(true);
             try {
@@ -173,15 +182,9 @@ public class MainActivity extends AppCompatActivity {
                 startService(sshIntent);
 
                 Log.d(TAG, "Starting proxy");
-                Intent intentPrepare = VpnService.prepare(this);
-                if (intentPrepare != null) {
-                    // TODO: replace deprecated method
-                    startActivityForResult(intentPrepare, 0);
-                }
+
                 vpnIntent.putExtra("socksPort", 1080);
                 startService(vpnIntent);
-
-
                 StatusInfo.getInstance().setActive(true);
             } catch (Exception e) {
                 StatusInfo.getInstance().setActive(false);
