@@ -169,11 +169,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Setting up port forward");
                 sshIntent.putExtra("user", username);
                 sshIntent.putExtra("password", password);
-                if (privateKey != null && !privateKey.equals("")) {
+                if (privateKey != null && !privateKey.isEmpty()) {
                     sshIntent.putExtra("privateKey", privateKey);
                 }
                 sshIntent.putExtra("hostname", hostname);
-                if(!String.valueOf(port).equals("") || between(port, 1 , 65535)) {
+                if(!String.valueOf(port).isEmpty() || between(port, 1 , 65535)) {
                     sshIntent.putExtra("port", String.valueOf(port));
                 }
                 else {
@@ -202,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
             stopService(sshIntent);
         }
     }
+    /** @noinspection SameParameterValue*/
     private static boolean between(int variable, int minValueInclusive, int maxValueInclusive) {
         return variable >= minValueInclusive && variable <= maxValueInclusive;
     }

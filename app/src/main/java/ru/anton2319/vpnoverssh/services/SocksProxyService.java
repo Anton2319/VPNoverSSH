@@ -174,9 +174,11 @@ public class SocksProxyService extends VpnService {
             int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
             long resultingAddress = currentAddress + subnetSize(mask);
             if(excludedIpsAton.contains(currentAddress)) {
+                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
                 excludedIpsAton.remove(0);
             }
             else {
+                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
                 builder.addRoute(ipNTOA(currentAddress), mask);
             }
             currentAddress = resultingAddress;
@@ -210,9 +212,11 @@ public class SocksProxyService extends VpnService {
             int mask = getMaximumMask(currentAddress, excludedIpsAton.isEmpty() ? endAddress : excludedIpsAton.get(0));
             long resultingAddress = currentAddress + subnetSize(mask);
             if(excludedIpsAton.contains(currentAddress)) {
+                Log.d(TAG, "Excluding: "+ipNTOA(currentAddress)+"/"+mask);
                 excludedIpsAton.remove(0);
             }
             else {
+                Log.v(TAG, "Adding: "+ipNTOA(currentAddress)+"/"+mask);
                 builder.addRoute(ipNTOA(currentAddress), mask);
             }
             currentAddress = resultingAddress;
@@ -269,5 +273,14 @@ public class SocksProxyService extends VpnService {
             }
         }
         return dottedDecimal.toString();
+    }
+
+    public static byte[] intToByteArrayBigEndian(int value) {
+        byte[] bytes = new byte[4];
+        bytes[0] = (byte) (value >> 24);
+        bytes[1] = (byte) (value >> 16);
+        bytes[2] = (byte) (value >> 8);
+        bytes[3] = (byte) value;
+        return bytes;
     }
 }
