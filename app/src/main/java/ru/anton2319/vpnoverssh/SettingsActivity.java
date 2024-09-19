@@ -66,6 +66,7 @@ public class SettingsActivity extends AppCompatActivity implements
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
     }
 
     @Override
@@ -79,6 +80,8 @@ public class SettingsActivity extends AppCompatActivity implements
     public boolean onSupportNavigateUp() {
         if (getSupportFragmentManager().popBackStackImmediate()) {
             return true;
+        } else {
+            onBackPressed();
         }
         return super.onSupportNavigateUp();
     }

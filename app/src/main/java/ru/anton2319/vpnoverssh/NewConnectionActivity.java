@@ -170,6 +170,12 @@ public class NewConnectionActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
+    }
+
     private void updateKeyCardData() {
         String privateKeyString = privateKey;
         privateKeyString = privateKeyString.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
