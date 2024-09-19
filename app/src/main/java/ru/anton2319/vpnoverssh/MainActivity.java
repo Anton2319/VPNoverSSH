@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     Intent vpnIntent;
 
     Intent sshIntent;
+
+    MutableLiveData<String> connectButtonData = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        connectButtonData.observe(this, newData -> runOnUiThread(() -> {
+            connectButton.setText(newData);
+        }));
     }
 
     @Override
@@ -126,7 +133,11 @@ public class MainActivity extends AppCompatActivity {
         SSHConnectionProfileAdapter adapter = new SSHConnectionProfileAdapter(this, sshConnectionProfileList);
         Spinner spinner = findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
-
+        if (StatusInfo.getInstance().isActive()) {
+            connectButtonData.postValue("disconnect");
+        } else {
+            connectButtonData.postValue("connect");
+        }
     }
 
     @Override
@@ -165,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.d(TAG, "Toggled on");
             StatusInfo.getInstance().setActive(true);
+            connectButtonData.postValue("disconnect");
             try {
                 Log.d(TAG, "Setting up port forward");
                 sshIntent.putExtra("user", username);
@@ -194,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
         else {
             Log.d(TAG, "Toggled off");
             StatusInfo.getInstance().setActive(false);
+            connectButtonData.postValue("connect");
             Thread vpnThread = SocksPersistent.getInstance().getVpnThread();
             if(vpnThread != null) {
                 vpnThread.interrupt();

@@ -6,7 +6,7 @@ public class StatusInfo {
     private static volatile StatusInfo instance = null;
     private static final Object lock = new Object();
 
-    private boolean active = false;
+    private volatile boolean active = false;
 
     private Intent vpnIntent;
 

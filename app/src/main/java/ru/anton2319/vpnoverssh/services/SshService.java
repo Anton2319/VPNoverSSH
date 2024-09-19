@@ -132,6 +132,7 @@ public class SshService extends Service {
                     forwarder = PortForward.getInstance().getForwarder();
                     conn.close();
                     forwarder.close();
+                    stopSelf();
                 }
             }
         });

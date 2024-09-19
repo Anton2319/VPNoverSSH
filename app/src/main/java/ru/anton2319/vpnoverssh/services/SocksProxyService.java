@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import ru.anton2319.vpnoverssh.data.singleton.PortForward;
 import ru.anton2319.vpnoverssh.data.singleton.SocksPersistent;
 import ru.anton2319.vpnoverssh.data.singleton.StatusInfo;
 
@@ -60,6 +61,16 @@ public class SocksProxyService extends VpnService {
         vpnThread.start();
 
         return START_STICKY;
+    }
+
+    @Override
+    public void onRevoke() {
+        StatusInfo.getInstance().setActive(false);
+        Thread sshThread = PortForward.getInstance().getSshThread();
+        if (sshThread != null) {
+            sshThread.interrupt();
+        }
+        super.onRevoke();
     }
 
     @Override
